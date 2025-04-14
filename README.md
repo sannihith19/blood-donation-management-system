@@ -120,5 +120,5 @@ CREATE TABLE blood_request (
 ---
 
 ## 👨‍💻 Developer
-**Sannihith Baba Sri**  
+**Baba Sri Sannihith Dharanikota**  
 [GitHub Repository](https://github.com/sannihith19/blood-donation-management-system)
