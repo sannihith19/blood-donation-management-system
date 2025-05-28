@@ -1,34 +1,40 @@
-import React, { useState } from 'react';
-import { IconButton } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import AddDonor from './AddDonor';
-import DeleteDonor from './DeleteDonor';
+import React, { useState } from "react";
+import { IconButton } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddDonor from "./AddDonor";
+import DeleteDonor from "./DeleteDonor";
 
-const EditDeleteButtons = ({ rowData, getData }) => {
-  const [isEditClicked, setIsEditClicked] = useState(false)
-  const [isDeleteClicked,setIsDeleteClicked]=useState(false)
+const EditDeleteButtons = (props) => {
+  const { rowData, getData } = props;
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   return (
     <>
-      <IconButton color="primary" onClick={()=>setIsEditClicked(true)}>
+      <IconButton color="primary" onClick={() => setOpenEditDialog(true)}>
         <EditIcon />
       </IconButton>
-      <IconButton color="secondary" onClick={()=>setIsDeleteClicked(true)}>
+      <IconButton color="error" onClick={() => setOpenDeleteDialog(true)}>
         <DeleteIcon />
       </IconButton>
-      {isEditClicked && 
-      <AddDonor
-      isDonorEdit = {true}
-      handleClose = {()=>setIsEditClicked(false)}
-      getData={getData}
-      rowData={rowData}
-      />}
-      {isDeleteClicked &&
-      <DeleteDonor
-      handleClose = {() => setIsDeleteClicked(false)}
-      rowData={rowData}
-      getData={getData}
-    />}
+
+      {openEditDialog && (
+        <AddDonor
+          isDonorEdit={true}
+          handleClose={() => setOpenEditDialog(false)}
+          getData={getData}
+          rowData={rowData}
+        />
+      )}
+
+      {openDeleteDialog && (
+        <DeleteDonor
+          handleClose={() => setOpenDeleteDialog(false)}
+          rowData={rowData}
+          getData={getData}
+        />
+      )}
     </>
   );
 };

@@ -1,148 +1,199 @@
-import React, { useEffect, useState } from 'react'
-
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Button from '@mui/material/Button';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import {
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Grid,
+  Divider,
+} from "@mui/material";
+import axios from "axios";
+import { baseUrl } from "../apiConfig";
+import { useSnackbar } from "./SnackbarProvider";
 
 const AddDonor = (props) => {
-  const { isDonorEdit, handleClose, getData, rowData } = props
-  const [name, setName] = useState('')
-  const [number, setNumber] = useState('')
-  const [email, setEmail] = useState('')
-  const [age, setAge] = useState(0)
-  const [gender, setGender] = useState('')
-  const [bloodType, setBloodType] = useState('')
-  const [address, setAddress] = useState('')
+  const { isDonorEdit, handleClose, getData, rowData } = props;
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [bloodType, setBloodType] = useState("");
+  const [address, setAddress] = useState("");
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (isDonorEdit) {
-      setName(rowData.donor_name)
-      setNumber(rowData.donor_number)
-      setEmail(rowData.donor_email)
-      setAge(rowData.donor_age)
-      setGender(rowData.donor_gender)
-      setBloodType(rowData.donor_bloodType)
-      setAddress(rowData.donor_address)
+      setName(rowData.donor_name);
+      setNumber(rowData.donor_number);
+      setEmail(rowData.donor_email);
+      setAge(rowData.donor_age);
+      setGender(rowData.donor_gender);
+      setBloodType(rowData.donor_bloodType);
+      setAddress(rowData.donor_address);
     }
-  }, [])
-
-
-
-
-  const onBloodTypeSelect = (e) => {
-    setBloodType(e.target.value)
-  }
-
-  const onGenderSelect = (e) => {
-    setGender(e.target.value)
-  }
+  }, []);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    let donorObj = {
+    e.preventDefault();
+    const donorObj = {
       donor_name: name,
       donor_number: number,
       donor_email: email,
       donor_age: age,
       donor_gender: gender,
       donor_bloodType: bloodType,
-      donor_address: address
-    }
-    if (isDonorEdit) {
-      donorObj = {...donorObj, donor_id: rowData.donor_id}
-      axios.post('http://localhost:8800/edit_donor_details', donorObj)
-        .then((res) => {
-          console.log("successfully edited")
-          handleClose()
-          getData()
-        })
-        .catch((error) => {
-          console.log(error.message);
-        });
-    } else {
-      axios.post('http://localhost:8800/add_donor_details', donorObj)
-        .then((res) => {
-          console.log("successfully added")
-          handleClose()
-          getData()
-        })
-        .catch((error) => {
-          console.log(error.message);
-        });
-    }
-  }
+      donor_address: address,
+      ...(isDonorEdit && { donor_id: rowData.donor_id }),
+    };
 
-  const allValuesEntered = name && number && email && age && gender && bloodType && address
+    const url = isDonorEdit
+      ? `${baseUrl}edit_donor_details`
+      : `${baseUrl}add_donor_details`;
 
+    axios
+      .post(url, donorObj)
+      .then(() => {
+        showSnackbar(
+          isDonorEdit
+            ? "Donor updated successfully!"
+            : "Donor added successfully!"
+        );
+        handleClose();
+        getData();
+      })
+      .catch((error) => {
+        console.error(error.message);
+        showSnackbar("An error occurred. Please try again.", "error");
+      });
+  };
+
+  const allValuesEntered =
+    name && number && email && age && gender && bloodType && address;
 
   return (
-    <React.Fragment>
-      <Dialog open={true} onClose={handleClose}>
-        <DialogTitle>{isDonorEdit ? "Edit Donor Information." : "Register to become a Donor."}</DialogTitle>
+    <>
+      <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {isDonorEdit
+            ? "Edit Donor Information"
+            : "Register to become a Donor"}
+        </DialogTitle>
+        <Divider />
         <DialogContent>
-          <div style={{ width: '500px' }}>
-            <form>
-              <div className="form-group">
-                <label>Name</label>
-                <input type="text" className="form-control" id="name" placeholder="Enter your name" onChange={(e) => setName(e.target.value)} value={name} />
-              </div>
-              <div className="form-group">
-                <label>Phone number</label>
-                <input type="text" className="form-control" id="number" placeholder="Enter your mobile name" maxLength={10} pattern="[1-9]\d{9}" onChange={(e) => setNumber(e.target.value)} value={number} />
-              </div>
-              <div className="form-group">
-                <label>Email address</label>
-                <input type="email" className="form-control" id="email" placeholder="name@example.com" onChange={(e) => setEmail(e.target.value)} value={email} />
-              </div>
-              <div className="form-group">
-                <label>Age</label>
-                <input type="Number" className="form-control" id="age" placeholder="Enter your age" onChange={(e) => setAge(e.target.value)} value={age} />
-              </div>
-              <div className="form-group">
-                <label>Gender</label>
-                <select className="form-control" id="gender" onChange={onGenderSelect} value={gender}>
-                  <option value='' hidden></option>
-                  <option value='M'>Male</option>
-                  <option value='F'>Female</option>
-                  <option value='other'>Choose not to specify</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Blood Type</label>
-                <select className="form-control" id="bloodType" onChange={onBloodTypeSelect} value={bloodType}>
-                  <option value='' hidden></option>
-                  <option value='O+' >O+</option>
-                  <option value='O-' >O-</option>
-                  <option value='A+' >A+</option>
-                  <option value='A-' >A-</option>
-                  <option value='B+' >B+</option>
-                  <option value='B-' >B-</option>
-                  <option value='AB+' >AB+</option>
-                  <option value='AB-' >AB-</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Address</label>
-                <textarea className="form-control" id="address" rows="2" onChange={(e) => setAddress(e.target.value)} value={address}></textarea>
-              </div>
-            </form>
-          </div>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  label="Phone Number"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  required
+                  fullWidth
+                  inputProps={{ maxLength: 10, pattern: "[1-9]\\d{9}" }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Age"
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  inputProps={{ min: 18, max: 65 }}
+                  required
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    label="Gender"
+                  >
+                    <MenuItem value="M">Male</MenuItem>
+                    <MenuItem value="F">Female</MenuItem>
+                    <MenuItem value="other">Choose not to specify</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Blood Type</InputLabel>
+                  <Select
+                    value={bloodType}
+                    onChange={(e) => setBloodType(e.target.value)}
+                    label="Blood Type"
+                  >
+                    {["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"].map(
+                      (type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      )
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  label="Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  fullWidth
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+            </Grid>
+          </form>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
             onClick={handleSubmit}
             disabled={!allValuesEntered}
+            variant="contained"
           >
             {isDonorEdit ? "Edit" : "Register"}
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment >
-  )
-}
+    </>
+  );
+};
 
-export default AddDonor
+export default AddDonor;

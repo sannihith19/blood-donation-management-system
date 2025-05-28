@@ -1,106 +1,105 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { Container, makeStyles, Paper, Grid, Card, CardContent } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+  Container,
+  makeStyles,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+} from '@material-ui/core';
 import Typography from '@mui/material/Typography';
 import AddBloodUnits from '../components/AddBloodUnits';
+import { baseUrl } from '../apiConfig';
 
-
-const styles = makeStyles(theme => ({
-    button: {
-        // margin: "5px !important"
+const useStyles = makeStyles((theme) => ({
+  container: {
+    textAlign: 'center',
+  },
+  typography: {
+    margin: theme.spacing(4, 0, 2),
+  },
+  paper: {
+    margin: theme.spacing(2),
+    borderRadius: theme.spacing(2.5),
+    padding: theme.spacing(3),
+  },
+  gridContainer: {
+    justifyContent: 'center',
+  },
+  card: {
+    margin: theme.spacing(2),
+    width: 250,
+    transition: '0.3s',
+    cursor: 'pointer',
+    '&:hover': {
+      transform: 'scale(1.05)',
+      border: '2px solid black',
     },
-    container: {
-
-        textAlign: "center"
-    },
-    table: {
-        height: '100%',
-        width: '100%',
-    },
-    typography: {
-        margin: "20px"
-    },
-    paper: {
-        margin: '10px',
-        borderRadius: '20px',
-        padding: '20px',
-    },
-    card: {
-        margin: '10px',
-        cursor: 'pointer',
-        width: '20%',
-        '&:hover': {
-            height: 'calc(25% + 20px)',
-            width: 'calc(25% + 20px)',
-            border: '5px solid black'
-        }
-    },
-    cardContent: {
-        padding: "20px",
-        height: "75px"
-    }
+  },
+  cardContent: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+  },
 }));
 
 const Events = () => {
-    const [eventsData, setEventsData] = useState([])
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const classes = useStyles();
+  const [eventsData, setEventsData] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  useEffect(() => {
+    getEventDetails();
+  }, []);
 
-    useEffect(() => {
-        getEventDetails()
-    }, [])
+  const getEventDetails = () => {
+    axios
+      .get(`${baseUrl}blood_donate_event`)
+      .then((res) => {
+        setEventsData(res.data);
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
 
+  return (
+    <Container className={classes.container}>
+      <div className={classes.typography}>
+        <Typography variant="h3">Event Details</Typography>
+      </div>
 
-    const getEventDetails = () => {
-        axios.get('http://localhost:8800/blood_donate_event')
-            .then((res) => {
-                setEventsData(res.data)
-            })
-            .catch((error) => {
-                console.log(error.message);
-            });
+      <Paper className={classes.paper} elevation={2}>
+        <Grid container className={classes.gridContainer}>
+          {Object.values(eventsData).map((option) => (
+            <Card
+              key={option.event_id}
+              onClick={() => setIsDialogOpen(true)}
+              className={classes.card}
+              elevation={3}
+            >
+              <CardContent className={classes.cardContent}>
+                <Typography variant="h6">{option.event_name}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {option.blood_bank_name}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {new Date(option.event_date).toLocaleDateString('en-US')}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {option.event_location}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Grid>
+      </Paper>
 
-    }
+      {isDialogOpen && (
+        <AddBloodUnits handleClose={() => setIsDialogOpen(false)} />
+      )}
+    </Container>
+  );
+};
 
-
-    const classes = styles();
-
-    return (
-        <Container className={classes.container}>
-            <div className={classes.typography}>
-                <Typography variant="h3">Event Details </Typography>
-            </div>
-            <Paper className={classes.paper}>
-                <Grid container>
-
-                    {Object.values(eventsData).map((option) =>
-                        <Card onClick={() => { setIsDialogOpen(true) }} className={classes.card}>
-                            <CardContent>
-                                <Typography variant="h5" component="div">
-                                    {option.event_name}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    {option.blood_bank_name}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    {new Date(option.event_date).toLocaleDateString('en-US')}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    {option.event_location}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    )}
-                </Grid>
-            </Paper>
-
-            {isDialogOpen && 
-                <AddBloodUnits 
-                handleClose = {() => setIsDialogOpen(false)}/>
-            }
-
-        </Container>
-    )
-}
-
-export default Events
+export default Events;
