@@ -1,46 +1,57 @@
-import React, { useEffect, useState } from 'react'
-
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Button from '@mui/material/Button';
-import axios from 'axios';
+import React from "react";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Typography,
+  Divider,
+  Box,
+} from "@mui/material";
+import axios from "axios";
+import { baseUrl } from "../apiConfig";
+import { useSnackbar } from "./SnackbarProvider";
 
 const DeleteDonor = (props) => {
-  const { handleClose, getData, rowData } = props
+  const { handleClose, getData, rowData } = props;
+  const { showSnackbar } = useSnackbar();
 
   const handleDelete = () => {
-    axios.delete(`http://localhost:8800/delete_donor?id=${rowData.donor_id}`)
-      .then(response => {
-        console.log('DELETE request successful:');
-        handleClose()
-        getData()
+    axios
+      .delete(`${baseUrl}delete_donor?id=${rowData.donor_id}`)
+      .then(() => {
+        showSnackbar("Donor deleted successfully!");
+        handleClose();
+        getData();
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error.message);
+        showSnackbar("An error occurred. Please try again.", "error");
       });
-  }
+  };
 
   return (
-    <React.Fragment>
-      <Dialog open={true} onClose={handleClose}>
-        <DialogTitle>Deleting a Donor</DialogTitle>
-        <DialogContent>
-          <div style={{ width: '500px' }}>
-            Are you sure you want to delete Donor: {rowData.donor_name} with email {rowData.donor_email}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button
-            onClick={handleDelete}>
-            delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment >
-  )
-}
+    <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle>Deleting a Donor</DialogTitle>
+      <Divider />
+      <DialogContent>
+        <Box mt={1} mb={2}>
+          <Typography>
+            Are you sure you want to delete Donor:{" "}
+            <strong>{rowData.donor_name}</strong> with email{" "}
+            <strong>{rowData.donor_email}</strong>?
+          </Typography>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleDelete} variant="contained" color="error">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
-export default DeleteDonor
+export default DeleteDonor;
