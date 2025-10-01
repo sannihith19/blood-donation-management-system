@@ -107,7 +107,7 @@ CREATE TABLE blood_request (
 );
 ```
 
-> 🔧 In `BE/index.js`, update line 8 with your MySQL connection credentials.
+> 🔧 In `BE/config/db.js`, update with your MySQL connection credentials.
 
 ---
 
