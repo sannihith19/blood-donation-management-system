@@ -4,12 +4,6 @@ A full-stack web application to manage blood donors, blood banks, donation event
 
 ---
 
-## Project Demo
-
-Watch the demo video here: [YouTube Demo](https://youtu.be/gYw1YvYKLdI)
-
----
-
 ## 🔧 Setup Instructions
 
 ### 1. Prerequisites
